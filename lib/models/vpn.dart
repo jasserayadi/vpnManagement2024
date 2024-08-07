@@ -5,7 +5,7 @@ class Vpn {
   String port;
   String pwd;
   String address;
-  String userId;
+  String? userId; // Change to String?
   List<String> clients;
 
   Vpn({
@@ -27,7 +27,7 @@ class Vpn {
       port: json['port'],
       pwd: json['pwd'],
       address: json['address'],
-      userId: json['userId'],
+      userId: json['userId'] as String?, // This remains unchanged
       clients: List<String>.from(json['clients'] ?? []),
     );
   }
@@ -40,7 +40,7 @@ class Vpn {
       'port': port,
       'pwd': pwd,
       'address': address,
-      'userId': userId,
+      'userId': userId, // This can now be null
       'clients': clients,
     };
   }

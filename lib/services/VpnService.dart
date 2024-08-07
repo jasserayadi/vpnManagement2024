@@ -8,76 +8,88 @@ class VpnService {
 
   VpnService({required this.baseUrl, required this.token});
 
-  Future<List<Vpn>> findAllByClient(String clientId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/vpn?clientId=$clientId'),
-      headers: {
-        'Authorization': 'Bearer $token',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      List<dynamic> body = json.decode(response.body);
-      return body.map((dynamic item) => Vpn.fromJson(item)).toList();
-    } else {
-      throw Exception('Failed to load VPNs');
-    }
-  }
-
-  Future<Vpn> getVpn(String id) async {
-    final response = await http.get(Uri.parse('$baseUrl/vpn/$id'));
-
-    if (response.statusCode == 200) {
-      return Vpn.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to load VPN');
-    }
-  }
-
   Future<Vpn> createVpn(Vpn vpn) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/vpn'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(vpn.toJson()),
-    );
+    try {
+      final url = Uri.parse('$baseUrl/vpn');
+      print('Sending POST request to $url');
+      
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Ensure the token is included
+        },
+        body: json.encode(vpn.toJson()),
+      );
 
-    if (response.statusCode == 201) {
-      return Vpn.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to create VPN');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        return Vpn.fromJson(json.decode(response.body));
+      } else {
+        final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+        throw Exception('Failed to add VPN: $errorMessage');
+      }
+    } catch (error) {
+      print('Error adding VPN: $error');
+      rethrow;
     }
   }
 
   Future<Vpn> updateVpn(String id, Vpn vpn) async {
-    final response = await http.put(
-      Uri.parse('$baseUrl/vpn/$id'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(vpn.toJson()),
-    );
+    try {
+      final url = Uri.parse('$baseUrl/vpn/$id');
+      print('Sending PATCH request to $url');
+      
+      final response = await http.patch(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token', // Ensure the token is included
+        },
+        body: json.encode(vpn.toJson()),
+      );
 
-    if (response.statusCode == 200) {
-      return Vpn.fromJson(json.decode(response.body));
-    } else {
-      throw Exception('Failed to update VPN');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return Vpn.fromJson(json.decode(response.body));
+      } else {
+        final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+        throw Exception('Failed to update VPN: $errorMessage');
+      }
+    } catch (error) {
+      print('Error updating VPN: $error');
+      rethrow;
     }
   }
 
-  Future<void> deleteVpn(String id) async {
-    final response = await http.delete(
-      Uri.parse('$baseUrl/vpn/$id'),
-      headers: <String, String>{
-        'Authorization': 'Bearer $token',
-      },
-    );
+  Future<Vpn> getVpn(String id) async {
+    try {
+      final url = Uri.parse('$baseUrl/vpn/$id');
+      print('Sending GET request to $url');
+      
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token', // Ensure the token is included
+        },
+      );
 
-    if (response.statusCode != 204) {
-      throw Exception('Failed to delete VPN');
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return Vpn.fromJson(json.decode(response.body));
+      } else {
+        final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+        throw Exception('Failed to get VPN: $errorMessage');
+      }
+    } catch (error) {
+      print('Error getting VPN: $error');
+      rethrow;
     }
   }
 }
