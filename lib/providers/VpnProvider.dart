@@ -26,4 +26,5 @@ class VpnProvider with ChangeNotifier {
       throw Exception('Failed to load VPNs');
     }
   }
+  
 }
