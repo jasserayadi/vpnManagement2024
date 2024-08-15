@@ -11,6 +11,7 @@ class ClientService {
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       print('Clients data: $data'); // Log the response data
+      
       return data.map((clientJson) => Client.fromJson(clientJson)).toList();
     } else {
       print('Failed to load clients: ${response.body}'); // Log the error response

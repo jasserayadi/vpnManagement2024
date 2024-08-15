@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:vpn_management/models/vpn.dart';
-import 'package:vpn_management/services/vpnservice.dart'; // Import your service
+import 'package:vpn_management/services/vpnservice.dart';
+import 'package:vpn_management/models/client.dart'; // Import Client model
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class VpnFormScreen extends StatefulWidget {
-  final String? vpnId; // Optional ID for editing an existing VPN
+  final String? vpnId;
   final String clientId;
 
   VpnFormScreen({this.vpnId, required this.clientId});
@@ -15,7 +18,6 @@ class VpnFormScreen extends StatefulWidget {
 class _VpnFormScreenState extends State<VpnFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late VpnService _vpnService;
-
   String _description = '';
   String _url = '';
   String _port = '';
@@ -23,20 +25,47 @@ class _VpnFormScreenState extends State<VpnFormScreen> {
   String _address = '';
   List<String> _clients = [];
   String? _userId;
+  List<Client> _allClients = []; // List to store all clients
 
   @override
   void initState() {
     super.initState();
     _vpnService = VpnService(
-      baseUrl: 'http://localhost:3001', // Replace with your API base URL
-      token: 'your-auth-token', // Replace with your authentication token
+      baseUrl: 'http://localhost:3001',
+      token: 'your-auth-token',
     );
 
     if (widget.vpnId != null) {
       _loadVpnDetails(widget.vpnId!);
     } else {
-      // Set the _userId when creating a new VPN
       _userId = widget.clientId;
+    }
+
+    _fetchClients(); // Load clients
+  }
+
+  Future<void> _fetchClients() async {
+    try {
+      final clients = await fetchClients();
+      setState(() {
+        _allClients = clients;
+      });
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading clients: $error')),
+      );
+    }
+  }
+
+  Future<List<Client>> fetchClients() async {
+    final url = Uri.parse('http://localhost:3001/clients');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      return data.map((clientJson) => Client.fromJson(clientJson)).toList();
+    } else {
+      throw Exception('Failed to load clients');
     }
   }
 
@@ -80,7 +109,7 @@ class _VpnFormScreenState extends State<VpnFormScreen> {
       port: _port,
       pwd: _pwd,
       address: _address,
-      userId: _userId!, // Now it's safe to use the bang operator
+      userId: _userId!,
       clients: _clients,
     );
 
@@ -96,6 +125,44 @@ class _VpnFormScreenState extends State<VpnFormScreen> {
         SnackBar(content: Text('Error saving VPN: $error')),
       );
     }
+  }
+
+  void _showClientSelectionDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Clients'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: _allClients.map((client) {
+                return CheckboxListTile(
+                  title: Text(client.clientName ?? 'Unknown'),
+                  value: _clients.contains(client.id),
+                  onChanged: (bool? value) {
+                    setState(() {
+                      if (value == true) {
+                        _clients.add(client.id!);
+                      } else {
+                        _clients.remove(client.id);
+                      }
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Done'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -171,6 +238,11 @@ class _VpnFormScreenState extends State<VpnFormScreen> {
                     return null;
                   },
                   onSaved: (value) => _address = value!,
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: _showClientSelectionDialog,
+                  child: Text('Select Clients'),
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
