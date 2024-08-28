@@ -6,8 +6,8 @@ import 'package:vpn_management/screens/clientListScreen.dart';
 import 'package:vpn_management/screens/clientForm.dart';
 import 'package:vpn_management/screens/login_screen.dart';
 import 'package:vpn_management/screens/register_screen.dart';
-import 'package:vpn_management/screens/vpnListScreen.dart'; // Import the VpnListScreen
-import 'package:vpn_management/screens/vpnFormScreen.dart'; // Import the VpnFormScreen
+import 'package:vpn_management/screens/vpnListScreen.dart';
+import 'package:vpn_management/screens/vpnFormScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,13 +15,13 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
- 
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => ClientProvider()),
-        ChangeNotifierProvider(create: (context) => VpnProvider()), // Add VpnProvider here
+        ChangeNotifierProvider(create: (context) => VpnProvider()),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',
@@ -29,7 +29,6 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
-          
         ),
         initialRoute: '/login',
         routes: {
@@ -37,7 +36,6 @@ class MyApp extends StatelessWidget {
           '/login': (context) => LoginScreen(),
           '/clients': (context) => ClientListScreen(),
           '/create-client': (context) => ClientForm(),
-        /*  '/create-vpn': (context) =>  VpnFormScreen(clientId: clientId1),*/
           '/': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
         },
         onGenerateRoute: (settings) {
@@ -49,7 +47,15 @@ class MyApp extends StatelessWidget {
               },
             );
           }
-          return null;
+          if (settings.name == '/create-vpn') {
+            final clientId = settings.arguments as String;
+            return MaterialPageRoute(
+              builder: (context) {
+                return VpnFormScreen(clientId: clientId);
+              },
+            );
+          }
+          return null; // Return null if no match is found
         },
       ),
     );

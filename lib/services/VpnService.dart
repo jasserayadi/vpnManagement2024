@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:vpn_management/models/vpn.dart'; // Import your model
 
@@ -12,7 +13,7 @@ class VpnService {
     try {
       final url = Uri.parse('$baseUrl/vpn');
       print('Sending POST request to $url');
-      
+
       final response = await http.post(
         url,
         headers: {
@@ -28,7 +29,8 @@ class VpnService {
       if (response.statusCode == 201) {
         return Vpn.fromJson(json.decode(response.body));
       } else {
-        final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+        final errorMessage =
+            json.decode(response.body)['message'] ?? 'Unknown error';
         throw Exception('Failed to add VPN: $errorMessage');
       }
     } catch (error) {
@@ -41,7 +43,7 @@ class VpnService {
     try {
       final url = Uri.parse('$baseUrl/vpn/$id');
       print('Sending PATCH request to $url');
-      
+
       final response = await http.patch(
         url,
         headers: {
@@ -57,7 +59,8 @@ class VpnService {
       if (response.statusCode == 200) {
         return Vpn.fromJson(json.decode(response.body));
       } else {
-        final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+        final errorMessage =
+            json.decode(response.body)['message'] ?? 'Unknown error';
         throw Exception('Failed to update VPN: $errorMessage');
       }
     } catch (error) {
@@ -70,7 +73,7 @@ class VpnService {
     try {
       final url = Uri.parse('$baseUrl/vpn/$id');
       print('Sending GET request to $url');
-      
+
       final response = await http.get(
         url,
         headers: {
@@ -84,7 +87,8 @@ class VpnService {
       if (response.statusCode == 200) {
         return Vpn.fromJson(json.decode(response.body));
       } else {
-        final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+        final errorMessage =
+            json.decode(response.body)['message'] ?? 'Unknown error';
         throw Exception('Failed to get VPN: $errorMessage');
       }
     } catch (error) {
@@ -92,4 +96,23 @@ class VpnService {
       rethrow;
     }
   }
+ Future<Map<String, dynamic>> getVpnConnectionDetails(String id) async {
+    final url = Uri.parse('$baseUrl/vpn/$id/connection-details');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      final errorMessage = json.decode(response.body)['message'] ?? 'Unknown error';
+      throw Exception('Failed to get VPN details: $errorMessage');
+    }
+  }
 }
+
+
+

@@ -29,10 +29,16 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   flutter_secure_storage: ^7.0.0
+  
   flutter:
     sdk: flutter
-
-
+  provider: ^6.0.0
+  flutter_vpn: ^0.12.0
+  
+  flutter_command: any
+  process: ^4.2.2
+  path_provider: ^2.0.13
+  process_run: 1.1.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
@@ -40,8 +46,9 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  provider: ^6.0.0
+  
   http: ^0.13.4
+  
   
 
   # The "flutter_lints" package below contains a set of recommended lints to
