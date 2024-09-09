@@ -1,23 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/client_provider.dart';
-import './clientForm.dart';
-import './vpnlistscreen.dart'; // Import the new VPN list screen
+import 'package:vpn_management/providers/client_provider.dart';
+import 'package:vpn_management/screens/clientForm.dart';
+import 'package:vpn_management/screens/userVpnListScreen.dart';
+import 'package:vpn_management/screens/vpnListScreen.dart';
 
-class ClientListScreen extends StatelessWidget {
+class Userclientlistscreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Clients'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.of(context).pushNamed('/create-client');
-            },
-          ),
-        ],
       ),
       body: FutureBuilder(
         future: Provider.of<ClientProvider>(context, listen: false).fetchClients(),
@@ -38,7 +31,7 @@ class ClientListScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (ctx) => VpnListScreen(clientId: client.id!),
+                          builder: (ctx) => userVpnListScreen(clientId: client.id!),
                         ),
                       );
                     },
@@ -85,4 +78,3 @@ class ClientListScreen extends StatelessWidget {
     );
   }
 }
-

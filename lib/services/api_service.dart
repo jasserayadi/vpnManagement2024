@@ -7,7 +7,8 @@ class AuthService {
   final String baseUrl = 'http://localhost:3001/auth';
   final FlutterSecureStorage storage = FlutterSecureStorage();
 
-  Future<User?> register(String username, String email, String password, String confirmPassword, String role) async {
+  Future<User?> register(String username, String email, String password,
+      String confirmPassword, String role) async {
     print('Registering user with:');
     print('Username: $username');
     print('Email: $email');
@@ -58,28 +59,21 @@ class AuthService {
     }
   }
 
-   Future<String?> getUserId(String token) async {
-    try {
-      // Split the JWT token into its components
-      final parts = token.split('.');
-      if (parts.length != 3) {
-        throw Exception('Invalid token');
-      }
+  Future<User?> getUserById(String userId) async {
+    final token = await storage.read(key: 'jwt_token');
+    final response = await http.get(
+      Uri.parse('http://localhost:3001/users/$userId'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
 
-      // Decode the payload part (the second part of the token)
-      final payload = parts[1];
-      final normalizedPayload = base64.normalize(payload);
-      final decodedPayload = utf8.decode(base64.decode(normalizedPayload));
-
-      // Convert the decoded payload into a Map
-      final payloadMap = json.decode(decodedPayload);
-      print('Decoded JWT payload: $payloadMap'); // Debug the entire payload
-
-      // Extract and return the sub (userId)
-      return payloadMap['sub'];
-    } catch (e) {
-      print('Error decoding token: $e');
-      return null;
+    if (response.statusCode == 200) {
+      return User.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to load user');
     }
   }
+  
 }

@@ -6,6 +6,7 @@ import 'package:vpn_management/screens/clientListScreen.dart';
 import 'package:vpn_management/screens/clientForm.dart';
 import 'package:vpn_management/screens/login_screen.dart';
 import 'package:vpn_management/screens/register_screen.dart';
+import 'package:vpn_management/screens/userClientListScreen.dart';
 import 'package:vpn_management/screens/vpnListScreen.dart';
 import 'package:vpn_management/screens/vpnFormScreen.dart';
 
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
           '/login': (context) => LoginScreen(),
           '/clients': (context) => ClientListScreen(),
           '/create-client': (context) => ClientForm(),
+            '/user-client-list': (context) => Userclientlistscreen(),
           '/': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
         },
         onGenerateRoute: (settings) {

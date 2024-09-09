@@ -12,23 +12,29 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  void _login() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        final token = await _authService.login(
-          _usernameController.text,
-          _passwordController.text,
-        );
-        if (token != null) {
-          _showLoginSuccessDialog();
+ void _login() async {
+  if (_formKey.currentState!.validate()) {
+    try {
+      final token = await _authService.login(
+        _usernameController.text,
+        _passwordController.text,
+      );
+
+      if (token != null) {
+        if (_usernameController.text == 'azer11' && _passwordController.text == '1234567') {
+          Navigator.pushReplacementNamed(context, '/clients');
         } else {
-          _showLoginFailedDialog('Invalid credentials');
+          Navigator.pushReplacementNamed(context, '/user-client-list');
         }
-      } catch (e) {
-        _showLoginFailedDialog('Login failed: $e');
+      } else {
+        _showLoginFailedDialog('Invalid credentials');
       }
+    } catch (e) {
+      _showLoginFailedDialog('Login failed: $e');
     }
   }
+}
+
 
   void _showLoginSuccessDialog() {
     showDialog(
