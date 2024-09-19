@@ -29,7 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   flutter_secure_storage: ^7.0.0
-  
+  video_player: ^2.2.6
   flutter:
     sdk: flutter
   provider: ^6.0.0
@@ -63,8 +63,11 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-
-  # The following line ensures that the Material Icons font is
+  assets:
+    - assets/images-removebg-preview.png
+    - assets/Capture décran 2024-09-12 011844.png
+    - assets/VPN.jpg
+      # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true

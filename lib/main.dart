@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:vpn_management/providers/client_provider.dart';
 import 'package:vpn_management/providers/VpnProvider.dart';
+import 'package:vpn_management/screens/HomeScreen.dart';
 import 'package:vpn_management/screens/clientListScreen.dart';
 import 'package:vpn_management/screens/clientForm.dart';
 import 'package:vpn_management/screens/login_screen.dart';
@@ -31,12 +32,13 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           useMaterial3: true,
         ),
-        initialRoute: '/login',
+        initialRoute: '/Home',
         routes: {
           '/register': (context) => RegisterScreen(),
           '/login': (context) => LoginScreen(),
           '/clients': (context) => ClientListScreen(),
           '/create-client': (context) => ClientForm(),
+          '/Home': (context) => HomeScreen(),
             '/user-client-list': (context) => Userclientlistscreen(),
           '/': (context) => const MyHomePage(title: 'Flutter Demo Home Page'),
         },

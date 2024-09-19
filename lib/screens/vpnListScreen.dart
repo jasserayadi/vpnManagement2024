@@ -20,116 +20,148 @@ class _VpnListScreenState extends State<VpnListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('VPNs for Client ${widget.clientId}'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (ctx) => VpnFormScreen(clientId: widget.clientId),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: FutureBuilder(
-              future: Provider.of<VpnProvider>(context, listen: false)
-                  .fetchVpnsForClient(widget.clientId),
-              builder: (ctx, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  print('Error: ${snapshot.error}');
-                  return Center(child: Text('Error loading VPNs'));
-                } else {
-                  return Consumer<VpnProvider>(
-                    builder: (ctx, vpnProvider, _) => ListView.builder(
-                      itemCount: vpnProvider.vpns.length,
-                      itemBuilder: (ctx, index) {
-                        final vpn = vpnProvider.vpns[index];
-                        final isConnected = vpnConnectionStatus[vpn.id] ?? false;
+    return SafeArea(
+      child: Scaffold(
+        // Removed the AppBar
+        body: Stack(
+          children: [
+            Positioned.fill(
+              child: Image.asset(
+                'assets/VPN.jpg', // Background image
+                fit: BoxFit.cover,
+              ),
+            ),
+            Column(
+              children: [
+                Expanded(
+                  child: FutureBuilder(
+                    future: Provider.of<VpnProvider>(context, listen: false)
+                        .fetchVpnsForClient(widget.clientId),
+                    builder: (ctx, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        print('Error: ${snapshot.error}');
+                        return Center(child: Text('Error loading VPNs'));
+                      } else {
+                        return Consumer<VpnProvider>(
+                          builder: (ctx, vpnProvider, _) => ListView.builder(
+                            itemCount: vpnProvider.vpns.length,
+                            itemBuilder: (ctx, index) {
+                              final vpn = vpnProvider.vpns[index];
+                              final isConnected = vpnConnectionStatus[vpn.id] ?? false;
 
-                        return ListTile(
-                          title: Text(vpn.description ?? 'No Description'),
-                          subtitle: Text(vpn.url ?? 'No URL'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (!isConnected)
-                                ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      vpnConnectionStatus[vpn.id] = true;
-                                    });
-                                    connectToVpn(vpn);
-                                  },
-                                  child: Text('Connect'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
+                              return Card(
+                                margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                                child: ListTile(
+                                  title: Text(vpn.description ?? 'No Description'),
+                                  subtitle: Text(vpn.url ?? 'No URL'),
+                                  trailing: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (!isConnected)
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              vpnConnectionStatus[vpn.id] = true;
+                                            });
+                                            connectToVpn(vpn);
+                                          },
+                                          child: Text('Connect'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        ),
+                                      if (isConnected)
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              vpnConnectionStatus[vpn.id] = false;
+                                            });
+                                            disconnectFromVpn(vpn);
+                                          },
+                                          child: Text('Disconnect'),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        ),
+                                      IconButton(
+                                        icon: Icon(Icons.edit),
+                                        color: Colors.blue,
+                                        onPressed: () {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (ctx) => VpnFormScreen(clientId: widget.clientId),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.delete),
+                                        color: Colors.red,
+                                        onPressed: () {
+                                          _confirmDelete(vpn.id);
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              if (isConnected)
-                                ElevatedButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      vpnConnectionStatus[vpn.id] = false;
-                                    });
-                                    disconnectFromVpn(vpn);
-                                  },
-                                  child: Text('Disconnect'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                  ),
-                                ),
-                              IconButton(
-                                icon: Icon(Icons.edit),
-                                color: Colors.blue,
-                                onPressed: () {
-                                  // Navigate to the VPN form screen for editing
-                                
-                                },
-                              ),
-                              IconButton(
-                                icon: Icon(Icons.delete),
-                                color: Colors.red,
-                                onPressed: () {
-                                  // Implement delete functionality
-                                  _confirmDelete(vpn.id);
-                                },
-                              ),
-                            ],
+                              );
+                            },
                           ),
                         );
-                      },
-                    ),
-                  );
-                }
-              },
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
+          ],
+        ),
+        bottomNavigationBar: _buildBottomNavigationBar(),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (ctx) => VpnFormScreen(clientId: widget.clientId),
+              ),
+            );
+          },
+          child: Icon(Icons.add),
+          backgroundColor: Colors.transparent,
+          tooltip: 'Add VPN',
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      color: Colors.blue,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'SRA Integration © 2024. Tous les droits réservés. Powered by SAME TEAM',
+            style: TextStyle(color: Colors.white),
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.facebook, color: Colors.white),
+              ),
+              IconButton(
+                onPressed: () {},
+                icon: Icon(Icons.camera_alt, color: Colors.white),
+              ),
+            ],
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (ctx) => VpnFormScreen(clientId: widget.clientId),
-            ),
-          );
-        },
-        child: Icon(Icons.add),
-        backgroundColor: Colors.blue,
-        tooltip: 'Add VPN',
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
       ),
     );
   }
@@ -168,9 +200,7 @@ class _VpnListScreenState extends State<VpnListScreen> {
       );
 
       if (response.statusCode == 204) {
-        // Successfully deleted
         setState(() {
-          // Remove the VPN from the list
           Provider.of<VpnProvider>(context, listen: false).vpns.removeWhere((vpn) => vpn.id == vpnId);
         });
       } else {
@@ -190,8 +220,6 @@ class _VpnListScreenState extends State<VpnListScreen> {
       );
 
       if (response.statusCode == 201) {
-        print('Connected to VPN successfully');
-        print('Command output: ${response.body}');
         setState(() {
           vpnConnectionStatus[vpn.id] = true;
         });
@@ -210,7 +238,6 @@ class _VpnListScreenState extends State<VpnListScreen> {
       );
 
       if (response.statusCode == 200) {
-        print('Disconnected from VPN successfully');
         setState(() {
           vpnConnectionStatus[vpn.id] = false;
         });

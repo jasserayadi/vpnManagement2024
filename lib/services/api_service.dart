@@ -4,7 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../models/user.dart';
 
 class AuthService {
-  final String baseUrl = 'http://localhost:3001/auth';
+  final String baseUrl = 'http://localhost:3001/auth';//final String baseUrl = 'http://10.0.2.2:3001/auth';
   final FlutterSecureStorage storage = FlutterSecureStorage();
 
   Future<User?> register(String username, String email, String password,
@@ -75,5 +75,40 @@ class AuthService {
       throw Exception('Failed to load user');
     }
   }
-  
+
+Future<void> logout() async {
+  try {
+    // Retrieve the token
+    final token = await storage.read(key: 'jwt_token');
+    
+    if (token == null) {
+      throw Exception('No token found');
+    }
+    
+    // Call the backend to invalidate the token
+    final response = await http.post(
+      Uri.parse('$baseUrl/logout'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({'token': token}), // Send the token in the request body
+    );
+    
+    if (response.statusCode == 200) {
+      // Clear the stored token upon successful logout
+      await storage.delete(key: 'jwt_token');
+      print('User successfully logged out.');
+    } else if (response.statusCode != 200 && response.body != '{"message":"Successfully logged out"}') {
+      print('Failed to logout: ${response.body}'); // Add the closing brace here
+      throw Exception('Failed to logout');
+    }
+  } catch (e) {
+    print('Error during logout: $e');
+    // Check if the error message is "Successfully logged out"
+    if (e.toString().contains('Successfully logged out')) {
+      return; // Return without throwing an exception
+    }
+    throw Exception('Failed to logout');
+  }
+}
 }
